@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Weather Widget</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="script-src 'self' 'unsafe-inline';"
+    />
+    <script defer src="renderer.js"></script>
+    <link rel="stylesheet" href="styles/base.css" />
+    <link rel="stylesheet" href="styles/index.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="weather-type">
+          <span id="weather-icon"></span>
+          <p id="weather-condition"></p>
+        </div>
+        <div class="city-search">
+          <div class="city-search__wrapper">
+            <input
+              type="text"
+              id="city-input"
+              class="city-search__input"
+              placeholder="Найти город..."
+            />
+            <button
+              id="city-search-btn"
+              class="city-search__btn"
+              aria-label="Поиск"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21L16.65 16.65" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header>
+      <main class="main">
+        <div id="loader" class="loader">
+          <div class="spinner"></div>
+        </div>
+        <section class="weather-today">
+          <div class="city-today">
+            <span class="city-today__name" id="city-name"></span>
+          </div>
+          <div class="degree-today">
+            <p class="degree-today__number" id="temperature">27</p>
+            <span class="degree-today__icon">°C</span>
+          </div>
+          <div class="feels-like-block" style="margin-bottom: 10px">
+            <p>Ощущается как: <span id="feels-like">--</span>°C</p>
+          </div>
+          <div class="date-today">
+            <span class="date-today__month" id="date-month"> </span>
+            <p class="date-today__day-and-time">
+              <span id="day-time"></span>
+            </p>
+          </div>
+          <div class="info-today">
+            <div class="info-today__block info-today__wind">
+              <img src="images/icons/wind-icon.png" alt="wind" />
+              <p class="info-today__text">Ветер: <span id="day-wind"></span></p>
+            </div>
+            <span class="separator">|</span>
+            <div class="info-today__block info-today__hum">
+              <img src="images/icons/hum-icon.png" alt="hum" />
+              <p class="info-today__text">
+                Влажность: <span id="day-humidity"></span>
+              </p>
+            </div>
+            <span class="separator">|</span>
+            <div class="info-today__block info-today__rain">
+              <img src="images/icons/rain-icon.png" alt="rain" />
+              <p class="info-today__text">
+                Осадки: <span id="day-rain"></span>
+              </p>
+            </div>
+          </div>
+        </section>
+        <section class="forecast-week" id="forecast-week">
+          <!-- Сюда JS будет вставлять карточки -->
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
