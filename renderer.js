@@ -13,14 +13,14 @@ function getWeather(query, overrideCityName = null) {
   if (query) {
     lastQuery = query;
   }
-  
-  
+
+
   if (!query) {
     query = lastQuery || cityInput.value.trim() || 'Цивильск';
   }
-  
+
   const loader = document.getElementById('loader');
-  if (loader) loader.classList.remove('hidden'); 
+  if (loader) loader.classList.remove('hidden');
 
   const API_URL = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${encodeURIComponent(query)}?unitGroup=metric&key=8LQF97DXMZVN5M9FTABV3BC6Y&contentType=json&lang=ru`;
 
@@ -32,8 +32,9 @@ function getWeather(query, overrideCityName = null) {
     .then(data => {
       const current = data.currentConditions;
       const today = data.days[0];
-      
-    
+
+
+
       const displayCityName = overrideCityName || data.resolvedAddress.split(',')[0];
 
       setText('city-name', displayCityName);
@@ -92,22 +93,24 @@ function getWeather(query, overrideCityName = null) {
         `;
         forecastContainer.appendChild(dayEl);
       });
+      updateClock(data.timezone);
       console.log(data)
-      
+
       if (loader) loader.classList.add('hidden');
     })
     .catch(error => {
       console.error(' Ошибка:', error);
       if (loader) loader.classList.add('hidden');
-    
+
       setText('city-name', 'Ошибка загрузки');
     });
+
 }
 
 function getCityNameFromCoords(lat, lon) {
   return fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=15&accept-language=ru`, {
     headers: {
-      'User-Agent': 'WeatherApp/1.0' 
+      'User-Agent': 'WeatherApp/1.0'
     }
   })
     .then(response => response.json())
@@ -115,14 +118,14 @@ function getCityNameFromCoords(lat, lon) {
       const address = data.address;
       console.log(data)
       // Пробуем разные варианты названия города
-      return address.city || 
-             address.town || 
-             address.village || 
-             address.hamlet || 
-             address.municipality ||
-             address.county ||
-             address.state ||
-             'Неизвестно';
+      return address.city ||
+        address.town ||
+        address.village ||
+        address.hamlet ||
+        address.municipality ||
+        address.county ||
+        address.state ||
+        'Неизвестно';
     });
 }
 function initApp() {
@@ -132,7 +135,7 @@ function initApp() {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
         const coords = `${lat},${lon}`;
-        
+
         // Получаем город и погоду
         getCityNameFromCoords(lat, lon)
           .then(cityName => {
@@ -142,8 +145,8 @@ function initApp() {
             console.warn(' Не удалось определить город, используем координаты');
             getWeather(coords);
           });
-          console.log(position)
-      }, 
+        console.log(position)
+      },
       function (error) {
         console.warn('Геолокация недоступна:', error.message);
         getWeather('Цивильск');
@@ -166,7 +169,7 @@ cityInput.addEventListener('keydown', function (e) {
     const query = cityInput.value.trim() || 'Цивильск';
     lastQuery = query;
     getWeather(query);
-    cityInput.blur(); 
+    cityInput.blur();
   }
 });
 
@@ -177,13 +180,29 @@ document.getElementById('city-search-btn').addEventListener('click', function ()
 });
 
 // Часы
-function updateClock() {
-  const now = new Date();
+function updateClock(cityTimeZone) {
+  const now = new Date()
   const weekDays = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
-  const dayName = weekDays[now.getDay()];
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  setText('day-time', `${dayName} | ${hours}:${minutes}`);
+  const options = {
+    timeZone: cityTimeZone,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    weekday: 'long'
+  }
+  const formatter = new Intl.DateTimeFormat('ru-RU', options)
+  const parts = formatter.formatToParts(now);
+  let dayName = '';
+  let time = '';
+  parts.forEach(part => {
+    if (part.type === 'weekday') dayName = part.value;
+    if (part.type === 'hour') time += part.value;
+    if (part.type === 'minute') time += ':' + part.value;
+  });
+  setText('day-time', `${dayName} | ${time}`);
+  console.log(parts)
+
+  // setText('day-time', `${dayName} | ${hours}:${minutes}`);
 }
 
 function getIconByCondition(iconKey) {
@@ -205,7 +224,7 @@ function startAutoUpdate() {
   if (autoUpdateInterval) {
     clearInterval(autoUpdateInterval);
   }
-  
+
 
   autoUpdateInterval = setInterval(() => {
     if (lastQuery) {
@@ -215,8 +234,7 @@ function startAutoUpdate() {
 }
 
 // Запуск
-updateClock();
-setInterval(updateClock, 60 * 1000);
 
+setInterval(updateClock, 30 * 1000);
 initApp();
 startAutoUpdate(); 
