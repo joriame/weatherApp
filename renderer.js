@@ -92,6 +92,7 @@ function getWeather(query, overrideCityName = null) {
         `;
         forecastContainer.appendChild(dayEl);
       });
+      console.log(data)
       
       if (loader) loader.classList.add('hidden');
     })
@@ -104,7 +105,7 @@ function getWeather(query, overrideCityName = null) {
 }
 
 function getCityNameFromCoords(lat, lon) {
-  return fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&accept-language=ru`, {
+  return fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=15&accept-language=ru`, {
     headers: {
       'User-Agent': 'WeatherApp/1.0' 
     }
@@ -112,7 +113,7 @@ function getCityNameFromCoords(lat, lon) {
     .then(response => response.json())
     .then(data => {
       const address = data.address;
-      
+      console.log(data)
       // Пробуем разные варианты названия города
       return address.city || 
              address.town || 
@@ -124,7 +125,6 @@ function getCityNameFromCoords(lat, lon) {
              'Неизвестно';
     });
 }
-
 function initApp() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -142,6 +142,7 @@ function initApp() {
             console.warn(' Не удалось определить город, используем координаты');
             getWeather(coords);
           });
+          console.log(position)
       }, 
       function (error) {
         console.warn('Геолокация недоступна:', error.message);
