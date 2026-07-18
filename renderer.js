@@ -1,21 +1,26 @@
-
 const cityInput = document.getElementById('city-input');
-let currentCity = 'Tsivilsk';
+const cityName = cityInput.value.trim() || 'Москва';
+
 
 function setText(id, text) {
   const el = document.getElementById(id);
   if (el) el.textContent = text;
 }
 
-function fetchWeather() {
-
-  const cityName = cityInput.value.trim() || 'Цивильск';
+function getWeather(query) {
+  if (!query) {
+    query = cityInput.value.trim() || 'Москва';
+  }
   currentCity = cityName;
+  const loader = document.getElementById('loader');
+  if (loader) loader.classList.add('hidden');
 
-  const API_URL = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${encodeURIComponent(cityName)}?unitGroup=metric&key=8LQF97DXMZVN5M9FTABV3BC6Y&contentType=json&lang=ru`;
+  const API_URL = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${encodeURIComponent(query)}?unitGroup=metric&key=8LQF97DXMZVN5M9FTABV3BC6Y&contentType=json&lang=ru`;
 
 
   fetch(API_URL)
+
+
     .then(response => response.json())
     .then(data => {
       const current = data.currentConditions;
@@ -38,15 +43,22 @@ function fetchWeather() {
       if (weatherIcon) {
         // Visual Crossing присылает: clear-day, cloudy, rain, snow, wind и т.д.
         const iconMap = {
-          'clear-day': '☀️',
-          'clear-night': '🌙',
-          'partly-cloudy-day': '⛅',
-          'cloudy': '☁️',
-          'rain': '🌧️',
-          'snow': '❄️',
-          'wind': '💨'
+          'clear-day': 'clear-day.svg',
+          'clear-night': 'clear-night.svg',
+          'partly-cloudy-day': 'partly-cloudy-day.svg',
+          'partly-cloudy-night': 'partly-cloudy-night.svg',
+          'cloudy': 'cloudy.svg',
+          'rain': 'rain.svg',
+          'snow': 'snow.svg',
+          'wind': 'wind.svg'
         };
-        weatherIcon.textContent = iconMap[current.icon] || '🌤️';
+        const iconName = iconMap[current.icon]
+        const img = document.createElement('img');
+        img.src = `images/icons/${iconName}`
+        img.alt = `Погода: ${current.icon || 'неизвестно'}`
+        img.style.width = '40px'
+        weatherIcon.innerHTML = '';
+        weatherIcon.appendChild(img)
       }
 
 
@@ -68,7 +80,7 @@ function fetchWeather() {
         dayEl.className = 'forecast-day';
         dayEl.innerHTML = `
     <div>${dayName}</div>
-    <div style="font-size: 16px;">${getIconByCondition(day.icon)}</div>
+    <div style="display:flex;justify-content:center"><img style='width:40px;height:40px' src=images/icons/${getIconByCondition(day.icon)} alt='Погода: ${current.icon || 'неизвестно'}' /></div>
     <div>${Math.round(day.temp)}°</div>
   `;
         forecastContainer.appendChild(dayEl);
@@ -83,20 +95,36 @@ function fetchWeather() {
 
 }
 
+function initApp() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function (position) {
+      const coords = `${position.coords.latitude},${position.coords.longitude}`;
+      getWeather(coords);
+    }, () => {
+      getWeather('Цивильск')
+    }
+    )
+  } else {
+    getWeather('Цивильск')
+  }
+}
+
+
+
 
 cityInput.addEventListener('change', function () {
-  fetchWeather();
+  getWeather();
 });
 
 
 cityInput.addEventListener('keydown', function (e) {
   if (e.key === 'Enter') {
-    fetchWeather();
+    getWeather();
   }
 });
 
 document.getElementById('city-search-btn').addEventListener('click', function () {
-  fetchWeather();
+  getWeather();
 });
 
 // Функция для обновления только времени
@@ -116,9 +144,14 @@ function updateClock() {
 
 function getIconByCondition(iconKey) {
   const iconMap = {
-    'clear-day': '☀️', 'clear-night': '🌙',
-    'partly-cloudy-day': '⛅', 'cloudy': '☁️',
-    'rain': '🌧️', 'snow': '❄️', 'wind': '💨'
+    'clear-day': 'clear-day.svg',
+    'clear-night': 'clear-night.svg',
+    'partly-cloudy-day': 'partly-cloudy-day.svg',
+    'partly-cloudy-night': 'partly-cloudy-night.svg',
+    'cloudy': 'cloudy.svg',
+    'rain': 'rain.svg',
+    'snow': 'snow.svg',
+    'wind': 'wind.svg'
   };
   return iconMap[iconKey] || '🌤️';
 }
@@ -127,5 +160,5 @@ setInterval(updateClock, 60 * 1000);
 
 updateClock();
 
-fetchWeather();
-setInterval(fetchWeather, 10 * 60 * 1000);
+setInterval(getWeather, 10 * 60 * 1000);
+initApp()

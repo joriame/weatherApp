@@ -530,6 +530,9 @@ header {
 }
 
 .forecast-day {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   background: rgba(255, 255, 255, 0.05);
   padding: 10px 5px;
   border-radius: 12px;
